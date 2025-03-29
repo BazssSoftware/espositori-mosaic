@@ -7,13 +7,7 @@ import Auth from '@/components/Auth';
 import { Espositore } from '@/types/espositore';
 import { espositori } from '@/data/espositori';
 import { v4 as uuidv4 } from 'uuid';
-import { createClient } from '@supabase/supabase-js';
-
-// Inizializza il client Supabase
-const supabaseUrl = 'https://your-supabase-url.supabase.co';
-const supabaseAnonKey = 'your-supabase-anon-key';
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey);
+import { supabase } from '@/integrations/supabase/client';
 
 const Admin: React.FC = () => {
   const [espositoriList, setEspositoriList] = useState<Espositore[]>(espositori);
