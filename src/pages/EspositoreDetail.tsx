@@ -10,6 +10,7 @@ import { espositori } from '@/data/espositori';
 import { Espositore } from '@/types/espositore';
 import { generatePDF } from '@/utils/pdfGenerator';
 import { useToast } from '@/components/ui/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const EspositoreDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -53,15 +54,15 @@ const EspositoreDetail: React.FC = () => {
       document.body.removeChild(link);
       
       toast({
-        title: "PDF Generated",
-        description: "The exhibitor information PDF has been downloaded.",
+        title: "PDF Generato",
+        description: "Le informazioni dell'espositore sono state scaricate in formato PDF.",
         duration: 3000,
       });
     } catch (error) {
       console.error("Error generating PDF:", error);
       toast({
-        title: "Error",
-        description: "Failed to generate PDF. Please try again.",
+        title: "Errore",
+        description: "Impossibile generare il PDF. Riprova più tardi.",
         variant: "destructive",
         duration: 3000,
       });
@@ -76,8 +77,8 @@ const EspositoreDetail: React.FC = () => {
         <Header />
         <main className="flex-1 container mx-auto px-4 py-10 flex items-center justify-center">
           <div className="text-center">
-            <h1 className="text-2xl font-semibold mb-4">Exhibitor not found</h1>
-            <Button onClick={() => navigate('/')}>Return to Exhibitors</Button>
+            <h1 className="text-2xl font-semibold mb-4">Espositore non trovato</h1>
+            <Button onClick={() => navigate('/')}>Torna agli Espositori</Button>
           </div>
         </main>
         <Footer />
@@ -91,15 +92,24 @@ const EspositoreDetail: React.FC = () => {
       
       <main className="flex-1 container mx-auto px-4 py-10">
         <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md p-6 animate-fade-in">
-          <div className="flex flex-col items-center mb-6">
-            <div className="h-32 flex items-center justify-center mb-4">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center">
+              <Avatar className="h-12 w-12 mr-3">
+                <AvatarImage src="/logo-sposi-oggi.png" alt="Sposi Oggi Logo" />
+                <AvatarFallback>SO</AvatarFallback>
+              </Avatar>
+              <h2 className="text-xl font-semibold text-wedding-dark">Sposi Oggi</h2>
+            </div>
+            <div className="h-16 flex items-center justify-center">
               <img 
                 src={espositore.logoUrl} 
                 alt={`${espositore.name} logo`} 
                 className="max-h-full max-w-full object-contain"
               />
             </div>
-            
+          </div>
+          
+          <div className="flex flex-col items-center mb-6">
             <h1 className="text-3xl md:text-4xl font-semibold text-wedding-dark text-center">
               {espositore.name}
             </h1>
@@ -115,13 +125,13 @@ const EspositoreDetail: React.FC = () => {
           
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Description</h2>
+              <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Descrizione</h2>
               <p className="text-gray-700 leading-relaxed">{espositore.description}</p>
             </div>
             
             {espositore.website && (
               <div>
-                <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Website</h2>
+                <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Sito Web</h2>
                 <a 
                   href={espositore.website} 
                   target="_blank" 
@@ -135,27 +145,27 @@ const EspositoreDetail: React.FC = () => {
             
             {espositore.phoneNumber && (
               <div>
-                <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Contact</h2>
+                <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Contatti</h2>
                 <p className="text-gray-700">{espositore.phoneNumber}</p>
               </div>
             )}
             
             {espositore.fairLocation && (
               <div>
-                <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Fair Location</h2>
+                <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Posizione Fiera</h2>
                 <p className="text-gray-700">{espositore.fairLocation}</p>
               </div>
             )}
             
             {espositore.images && espositore.images.length > 0 && (
               <div>
-                <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Gallery</h2>
+                <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Galleria</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {espositore.images.map((image, index) => (
                     <div key={index} className="rounded-md overflow-hidden aspect-video">
                       <img 
                         src={image} 
-                        alt={`${espositore.name} - image ${index + 1}`} 
+                        alt={`${espositore.name} - immagine ${index + 1}`} 
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -170,7 +180,7 @@ const EspositoreDetail: React.FC = () => {
                 disabled={isGeneratingPDF}
                 className="bg-wedding-gold hover:bg-wedding-gold/90 text-white min-w-64"
               >
-                {isGeneratingPDF ? "Generating PDF..." : "Download Information PDF"}
+                {isGeneratingPDF ? "Generazione PDF in corso..." : "Scarica Informazioni PDF"}
               </Button>
             </div>
             
@@ -180,7 +190,7 @@ const EspositoreDetail: React.FC = () => {
                 onClick={() => navigate('/')}
                 className="border-wedding-primary/50 hover:bg-wedding-primary/20"
               >
-                Back to All Exhibitors
+                Torna a Tutti gli Espositori
               </Button>
             </div>
           </div>
