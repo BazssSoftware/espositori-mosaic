@@ -1,22 +1,41 @@
 
-import { Espositore } from "../types/espositore";
+import { Espositore } from "@/types/espositore";
 import { jsPDF } from "jspdf";
 
 // Funzione per convertire una URL immagine in data URL
-const getImageAsDataURL = async (url: string): Promise<string> => {
+const getImageAsDataURL = async (url: string): Promise<string | null> => {
   try {
     const response = await fetch(url);
+    if (!response.ok) {
+      console.error(`Errore nel caricamento dell'immagine: ${response.status} ${response.statusText}`);
+      return null;
+    }
+    
     const blob = await response.blob();
     
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
+      reader.onerror = (e) => {
+        console.error("Errore nella lettura dell'immagine:", e);
+        reject(e);
+      };
       reader.readAsDataURL(blob);
     });
   } catch (error) {
-    console.error("Error fetching image:", error);
-    return "";
+    console.error("Errore nel recupero dell'immagine:", error);
+    return null;
+  }
+};
+
+// Funzione per verificare validità dell'immagine
+const isValidImageUrl = async (url: string): Promise<boolean> => {
+  try {
+    const response = await fetch(url, { method: 'HEAD' });
+    return response.ok && response.headers.get('content-type')?.startsWith('image/');
+  } catch (error) {
+    console.error(`Errore nella verifica dell'immagine ${url}:`, error);
+    return false;
   }
 };
 
@@ -26,58 +45,60 @@ export const generatePDF = async (espositore: Espositore): Promise<string> => {
   const doc = new jsPDF();
   
   try {
-    // Carica il logo di Sposi Oggi
-    const sposiOggiLogoUrl = "/logo-sposi-oggi.png";
-    const sposiOggiLogoDataUrl = await getImageAsDataURL(sposiOggiLogoUrl);
-    
-    // Aggiungi il logo di Sposi Oggi
-    if (sposiOggiLogoDataUrl) {
-      doc.addImage(sposiOggiLogoDataUrl, "PNG", 10, 10, 30, 30);
-    }
-    
-    // Aggiungi il logo dell'espositore se disponibile
-    if (espositore.logoUrl) {
-      try {
-        const espositoreLogoDataUrl = await getImageAsDataURL(espositore.logoUrl);
-        if (espositoreLogoDataUrl) {
-          doc.addImage(espositoreLogoDataUrl, "PNG", 160, 10, 30, 30);
-        }
-      } catch (e) {
-        console.error("Errore nel caricamento del logo dell'espositore:", e);
-      }
-    }
+    let yPosition = 20;
     
     // Titolo
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
-    doc.text("Espositore Sposi Oggi", 105, 50, { align: "center" });
+    doc.text("Espositore Sposi Oggi", 105, yPosition, { align: "center" });
+    yPosition += 15;
     
     // Nome dell'espositore come sottotitolo
     doc.setFontSize(18);
-    doc.text(espositore.name, 105, 60, { align: "center" });
+    doc.text(espositore.name, 105, yPosition, { align: "center" });
+    yPosition += 10;
     
     // Aggiungi linea separatrice
     doc.setDrawColor(233, 183, 206); // Colore rosa
     doc.setLineWidth(0.5);
-    doc.line(20, 65, 190, 65);
+    doc.line(20, yPosition, 190, yPosition);
+    yPosition += 10;
+    
+    // Aggiungi logo dell'espositore se disponibile
+    if (espositore.logoUrl) {
+      const isValidLogo = await isValidImageUrl(espositore.logoUrl);
+      if (isValidLogo) {
+        try {
+          const logoDataUrl = await getImageAsDataURL(espositore.logoUrl);
+          if (logoDataUrl) {
+            doc.addImage(logoDataUrl, "AUTO", 105 - 30, yPosition, 60, 40, undefined, 'FAST');
+            yPosition += 50;
+          }
+        } catch (e) {
+          console.error("Errore nell'elaborazione del logo:", e);
+          // Continua senza il logo
+        }
+      }
+    }
     
     // Aggiungi categoria se disponibile
     if (espositore.category) {
       doc.setFont("helvetica", "italic");
       doc.setFontSize(14);
-      doc.text(espositore.category, 105, 72, { align: "center" });
+      doc.text(espositore.category, 105, yPosition, { align: "center" });
+      yPosition += 10;
     }
     
     // Aggiungi descrizione
     doc.setFont("helvetica", "normal");
     doc.setFontSize(12);
-    doc.text("Descrizione:", 20, 85);
+    doc.text("Descrizione:", 20, yPosition);
+    yPosition += 7;
     
     // Formatta e aggiungi il testo della descrizione con ritorno a capo
     const descriptionLines = doc.splitTextToSize(espositore.description, 170);
-    doc.text(descriptionLines, 20, 92);
-    
-    let yPosition = 92 + (descriptionLines.length * 7);
+    doc.text(descriptionLines, 20, yPosition);
+    yPosition += (descriptionLines.length * 7) + 10;
     
     // Aggiungi informazioni di contatto
     doc.setFont("helvetica", "bold");
@@ -95,42 +116,60 @@ export const generatePDF = async (espositore: Espositore): Promise<string> => {
       yPosition += 7;
     }
     
+    if (espositore.email) {
+      doc.text(`Email: ${espositore.email}`, 20, yPosition);
+      yPosition += 7;
+    }
+    
     if (espositore.fairLocation) {
       doc.text(`Posizione Fiera: ${espositore.fairLocation}`, 20, yPosition);
-      yPosition += 15;
+      yPosition += 10;
+    }
+    
+    // Aggiungi informazioni sulle fiere a cui partecipa
+    if (espositore.fiere && espositore.fiere.length > 0) {
+      yPosition += 5;
+      doc.setFont("helvetica", "bold");
+      doc.text("Partecipa alle Fiere:", 20, yPosition);
+      yPosition += 7;
+      
+      doc.setFont("helvetica", "normal");
+      espositore.fiere.forEach(fiera => {
+        doc.text(`• ${fiera}`, 25, yPosition);
+        yPosition += 7;
+      });
+      yPosition += 3;
     }
     
     // Aggiungi sezione immagini se disponibili
     if (espositore.images && espositore.images.length > 0) {
+      yPosition += 5;
       doc.setFont("helvetica", "bold");
       doc.text("Galleria Immagini", 20, yPosition);
       yPosition += 10;
       
       // Carica e aggiungi le immagini
-      let imagesProcessed = 0;
-      const maxImagesToProcess = Math.min(4, espositore.images.length); // Limita a 4 immagini
+      let imagesAdded = 0;
+      const maxImagesToProcess = Math.min(2, espositore.images.length); // Limita a 2 immagini per evitare problemi
       
       for (let i = 0; i < maxImagesToProcess; i++) {
         try {
           const imageUrl = espositore.images[i];
-          const imageDataUrl = await getImageAsDataURL(imageUrl);
+          const isValid = await isValidImageUrl(imageUrl);
           
-          if (imageDataUrl) {
-            // Calcola posizione per 2 immagini per riga
-            const xPos = i % 2 === 0 ? 20 : 110;
-            const yPos = yPosition + Math.floor(i / 2) * 60;
-            
-            doc.addImage(imageDataUrl, "JPEG", xPos, yPos, 80, 50);
-            imagesProcessed++;
+          if (isValid) {
+            const imageDataUrl = await getImageAsDataURL(imageUrl);
+            if (imageDataUrl) {
+              // Usa sempre una sola immagine per riga per semplicità
+              doc.addImage(imageDataUrl, "AUTO", 20, yPosition, 170, 90, undefined, 'FAST');
+              yPosition += 100;
+              imagesAdded++;
+            }
           }
         } catch (error) {
           console.error(`Errore nel caricamento dell'immagine ${i}:`, error);
+          // Continua con la prossima immagine
         }
-      }
-      
-      // Aggiorna la posizione Y dopo aver aggiunto le immagini
-      if (imagesProcessed > 0) {
-        yPosition += Math.ceil(imagesProcessed / 2) * 60 + 10;
       }
     }
     
@@ -142,10 +181,11 @@ export const generatePDF = async (espositore: Espositore): Promise<string> => {
     doc.text("Sposi Oggi - Un progetto di Events Srls", 105, footerYPos - 20, { align: "center" });
     doc.text("Via Montello 11 Treviso (TV)", 105, footerYPos - 15, { align: "center" });
     doc.text("P.IVA 05127530268 | marketing@onlyoumedia.it", 105, footerYPos - 10, { align: "center" });
-    doc.text(`Generato il ${new Date().toLocaleDateString()}`, 105, footerYPos, { align: "center" });
+    doc.text(`Generato il ${new Date().toLocaleDateString()}`, 105, footerYPos - 5, { align: "center" });
     
   } catch (error) {
     console.error("Errore nella generazione del PDF:", error);
+    throw new Error("Impossibile generare il PDF: " + error.message);
   }
   
   // Restituisci come data URL

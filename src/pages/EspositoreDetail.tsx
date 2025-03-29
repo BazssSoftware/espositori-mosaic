@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -59,7 +58,7 @@ const EspositoreDetail: React.FC = () => {
         duration: 3000,
       });
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error("Errore nella generazione del PDF:", error);
       toast({
         title: "Errore",
         description: "Impossibile generare il PDF. Riprova più tardi.",
@@ -100,13 +99,18 @@ const EspositoreDetail: React.FC = () => {
               </Avatar>
               <h2 className="text-xl font-semibold text-wedding-dark">Sposi Oggi</h2>
             </div>
-            <div className="h-16 flex items-center justify-center">
-              <img 
-                src={espositore.logoUrl} 
-                alt={`${espositore.name} logo`} 
-                className="max-h-full max-w-full object-contain"
-              />
-            </div>
+            {espositore.logoUrl && (
+              <div className="h-16 flex items-center justify-center">
+                <img 
+                  src={espositore.logoUrl} 
+                  alt={`${espositore.name} logo`} 
+                  className="max-h-full max-w-full object-contain"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
+            )}
           </div>
           
           <div className="flex flex-col items-center mb-6">
@@ -167,6 +171,9 @@ const EspositoreDetail: React.FC = () => {
                         src={image} 
                         alt={`${espositore.name} - immagine ${index + 1}`} 
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
                       />
                     </div>
                   ))}

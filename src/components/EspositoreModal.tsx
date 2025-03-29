@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Mail, Phone } from "lucide-react";
 import { Espositore } from "@/types/espositore";
 import { generatePDF } from "@/utils/pdfGenerator";
 import { useToast } from "@/components/ui/use-toast";
@@ -34,15 +34,15 @@ const EspositoreModal: React.FC<EspositoreModalProps> = ({ espositore, isOpen, o
       document.body.removeChild(link);
       
       toast({
-        title: "PDF Generated",
-        description: "The exhibitor information PDF has been downloaded.",
+        title: "PDF Generato",
+        description: "Le informazioni dell'espositore sono state scaricate in formato PDF.",
         duration: 3000,
       });
     } catch (error) {
-      console.error("Error generating PDF:", error);
+      console.error("Errore nella generazione del PDF:", error);
       toast({
-        title: "Error",
-        description: "Failed to generate PDF. Please try again.",
+        title: "Errore",
+        description: "Impossibile generare il PDF. Riprova più tardi.",
         variant: "destructive",
         duration: 3000,
       });
@@ -58,11 +58,16 @@ const EspositoreModal: React.FC<EspositoreModalProps> = ({ espositore, isOpen, o
       <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-center mb-2">
-            <img 
-              src={espositore.logoUrl} 
-              alt={`${espositore.name} logo`} 
-              className="max-h-20 max-w-full object-contain"
-            />
+            {espositore.logoUrl && (
+              <img 
+                src={espositore.logoUrl} 
+                alt={`${espositore.name} logo`} 
+                className="max-h-20 max-w-full object-contain"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
+            )}
           </div>
           <DialogTitle className="text-2xl text-center text-wedding-dark">
             {espositore.name}
@@ -78,13 +83,13 @@ const EspositoreModal: React.FC<EspositoreModalProps> = ({ espositore, isOpen, o
         
         <div className="space-y-4">
           <div>
-            <h3 className="text-xl font-semibold mb-2 text-wedding-dark">Description</h3>
+            <h3 className="text-xl font-semibold mb-2 text-wedding-dark">Descrizione</h3>
             <p className="text-gray-700">{espositore.description}</p>
           </div>
           
           {espositore.website && (
             <div>
-              <h3 className="text-xl font-semibold mb-2 text-wedding-dark">Website</h3>
+              <h3 className="text-xl font-semibold mb-2 text-wedding-dark">Sito Web</h3>
               <a 
                 href={espositore.website} 
                 target="_blank" 
@@ -96,23 +101,58 @@ const EspositoreModal: React.FC<EspositoreModalProps> = ({ espositore, isOpen, o
             </div>
           )}
           
+          {espositore.phoneNumber && (
+            <div>
+              <h3 className="text-xl font-semibold mb-2 text-wedding-dark">Telefono</h3>
+              <p className="text-gray-700 flex items-center">
+                <Phone className="mr-1 h-4 w-4" /> {espositore.phoneNumber}
+              </p>
+            </div>
+          )}
+          
+          {espositore.email && (
+            <div>
+              <h3 className="text-xl font-semibold mb-2 text-wedding-dark">Email</h3>
+              <a 
+                href={`mailto:${espositore.email}`}
+                className="text-blue-600 hover:underline flex items-center"
+              >
+                <Mail className="mr-1 h-4 w-4" /> {espositore.email}
+              </a>
+            </div>
+          )}
+          
           {espositore.fairLocation && (
             <div>
-              <h3 className="text-xl font-semibold mb-2 text-wedding-dark">Fair Location</h3>
+              <h3 className="text-xl font-semibold mb-2 text-wedding-dark">Posizione Fiera</h3>
               <p className="text-gray-700">{espositore.fairLocation}</p>
+            </div>
+          )}
+          
+          {espositore.fiere && espositore.fiere.length > 0 && (
+            <div>
+              <h3 className="text-xl font-semibold mb-2 text-wedding-dark">Partecipa alle Fiere</h3>
+              <ul className="list-disc pl-5">
+                {espositore.fiere.map((fiera, index) => (
+                  <li key={index} className="text-gray-700">{fiera}</li>
+                ))}
+              </ul>
             </div>
           )}
           
           {espositore.images && espositore.images.length > 0 && (
             <div>
-              <h3 className="text-xl font-semibold mb-2 text-wedding-dark">Gallery</h3>
+              <h3 className="text-xl font-semibold mb-2 text-wedding-dark">Galleria</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {espositore.images.map((image, index) => (
                   <div key={index} className="rounded-md overflow-hidden aspect-video">
                     <img 
                       src={image} 
-                      alt={`${espositore.name} - image ${index + 1}`} 
+                      alt={`${espositore.name} - immagine ${index + 1}`} 
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
                     />
                   </div>
                 ))}
@@ -126,7 +166,7 @@ const EspositoreModal: React.FC<EspositoreModalProps> = ({ espositore, isOpen, o
               disabled={isGeneratingPDF}
               className="bg-wedding-gold hover:bg-wedding-gold/90 text-white"
             >
-              {isGeneratingPDF ? "Generating PDF..." : "Download Information PDF"}
+              {isGeneratingPDF ? "Generazione PDF in corso..." : "Scarica Informazioni PDF"}
             </Button>
           </div>
         </div>
