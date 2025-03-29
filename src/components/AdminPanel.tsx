@@ -8,6 +8,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Espositore } from "@/types/espositore";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { MultiSelect } from "@/components/ui/multi-select";
+import { getOpzioniFiere } from "@/data/fiere";
+import { getOpzioniCategorie } from "@/data/categorie";
+import { useNavigate } from 'react-router-dom';
 
 interface AdminPanelProps {
   onAddEspositore: (espositore: Omit<Espositore, 'id'>) => void;
@@ -15,15 +19,26 @@ interface AdminPanelProps {
 
 const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [logoUrl, setLogoUrl] = useState('');
   const [website, setWebsite] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [fairLocation, setFairLocation] = useState('');
-  const [category, setCategory] = useState('');
+  const [email, setEmail] = useState('');
   const [imageUrl, setImageUrl] = useState('');
   const [images, setImages] = useState<string[]>([]);
+  const [selectedFiere, setSelectedFiere] = useState<string[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  const opzioniFiere = getOpzioniFiere();
+  const opzioniCategorie = getOpzioniCategorie();
+
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
 
   const handleAddImage = () => {
     if (imageUrl.trim()) {
@@ -39,17 +54,35 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation
+    // Validazione
     if (!name.trim() || !description.trim() || !logoUrl.trim()) {
       toast({
-        title: "Missing Required Fields",
-        description: "Please fill in all required fields (Name, Description, Logo URL).",
+        title: "Campi obbligatori mancanti",
+        description: "Compila tutti i campi obbligatori (Nome, Descrizione, URL Logo).",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (description.length < 100) {
+      toast({
+        title: "Descrizione troppo breve",
+        description: "La descrizione deve contenere almeno 100 caratteri.",
         variant: "destructive",
       });
       return;
     }
     
-    // Create new exhibitor
+    if (email && !isValidEmail(email)) {
+      toast({
+        title: "Email non valida",
+        description: "Inserisci un indirizzo email valido.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Creazione nuovo espositore
     const newEspositore: Omit<Espositore, 'id'> = {
       name: name.trim(),
       description: description.trim(),
@@ -57,100 +90,126 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
       website: website.trim() || undefined,
       phoneNumber: phoneNumber.trim() || undefined,
       fairLocation: fairLocation.trim() || undefined,
-      category: category.trim() || undefined,
+      email: email.trim() || undefined,
       images: images.length > 0 ? [...images] : undefined,
+      fiere: selectedFiere.length > 0 ? [...selectedFiere] : undefined,
+      categories: selectedCategories.length > 0 ? [...selectedCategories] : undefined,
     };
     
-    // Add the exhibitor
+    // Aggiunta dell'espositore
     onAddEspositore(newEspositore);
     
-    // Reset form
+    // Reset del form
     setName('');
     setDescription('');
     setLogoUrl('');
     setWebsite('');
     setPhoneNumber('');
     setFairLocation('');
-    setCategory('');
+    setEmail('');
     setImageUrl('');
     setImages([]);
+    setSelectedFiere([]);
+    setSelectedCategories([]);
     
-    // Show success message
+    // Mostra messaggio di successo
     toast({
-      title: "Exhibitor Added",
-      description: `${name} has been successfully added to the exhibitors list.`,
+      title: "Espositore aggiunto",
+      description: `${name} è stato aggiunto con successo all'elenco degli espositori.`,
     });
   };
 
   return (
     <Card className="w-full max-w-4xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-2xl text-center text-wedding-dark">Add New Exhibitor</CardTitle>
+        <CardTitle className="text-2xl text-center text-wedding-dark">Aggiungi Nuovo Espositore</CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="flex justify-between mb-6">
+          <Button
+            onClick={() => navigate('/admin/fiere')}
+            variant="outline"
+            className="border-wedding-primary/50 hover:bg-wedding-primary/20"
+          >
+            Gestione Fiere
+          </Button>
+          
+          <Button
+            onClick={() => navigate('/admin/categorie')}
+            variant="outline"
+            className="border-wedding-primary/50 hover:bg-wedding-primary/20"
+          >
+            Gestione Categorie
+          </Button>
+        </div>
+        
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-wedding-dark">Name *</Label>
+              <Label htmlFor="name" className="text-wedding-dark">Nome *</Label>
               <Input 
                 id="name" 
                 value={name} 
                 onChange={(e) => setName(e.target.value)} 
-                placeholder="Exhibitor Name" 
+                placeholder="Nome Espositore" 
                 required
                 className="border-wedding-primary/50 focus:border-wedding-primary"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="category" className="text-wedding-dark">Category</Label>
+              <Label htmlFor="email" className="text-wedding-dark">Email</Label>
               <Input 
-                id="category" 
-                value={category} 
-                onChange={(e) => setCategory(e.target.value)} 
-                placeholder="e.g. Abiti da Sposa, Catering, Fiori"
+                id="email" 
+                type="email"
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                placeholder="esempio@dominio.it"
                 className="border-wedding-primary/50 focus:border-wedding-primary"
               />
             </div>
             
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="description" className="text-wedding-dark">Description *</Label>
+              <Label htmlFor="description" className="text-wedding-dark">Descrizione * (min. 100 caratteri)</Label>
               <Textarea 
                 id="description" 
                 value={description} 
                 onChange={(e) => setDescription(e.target.value)} 
-                placeholder="Detailed description of the exhibitor" 
+                placeholder="Descrizione dettagliata dell'espositore" 
                 required 
                 rows={4}
                 className="border-wedding-primary/50 focus:border-wedding-primary"
               />
+              <div className="text-sm text-muted-foreground">
+                {description.length} / 100 caratteri minimi
+              </div>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="logoUrl" className="text-wedding-dark">Logo URL *</Label>
+              <Label htmlFor="logoUrl" className="text-wedding-dark">URL Logo *</Label>
               <Input 
                 id="logoUrl" 
                 value={logoUrl} 
                 onChange={(e) => setLogoUrl(e.target.value)} 
-                placeholder="https://example.com/logo.jpg" 
+                placeholder="https://esempio.com/logo.jpg" 
                 required
                 className="border-wedding-primary/50 focus:border-wedding-primary"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="website" className="text-wedding-dark">Website</Label>
+              <Label htmlFor="website" className="text-wedding-dark">Sito Web</Label>
               <Input 
                 id="website" 
                 value={website} 
                 onChange={(e) => setWebsite(e.target.value)} 
-                placeholder="https://www.example.com"
+                placeholder="https://www.esempio.com"
                 className="border-wedding-primary/50 focus:border-wedding-primary"
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phoneNumber" className="text-wedding-dark">Phone Number</Label>
+              <Label htmlFor="phoneNumber" className="text-wedding-dark">Numero di Telefono</Label>
               <Input 
                 id="phoneNumber" 
                 value={phoneNumber} 
@@ -161,13 +220,35 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="fairLocation" className="text-wedding-dark">Fair Location</Label>
+              <Label htmlFor="fairLocation" className="text-wedding-dark">Posizione in Fiera</Label>
               <Input 
                 id="fairLocation" 
                 value={fairLocation} 
                 onChange={(e) => setFairLocation(e.target.value)} 
-                placeholder="e.g. Padiglione A, Stand 12"
+                placeholder="Es. Padiglione A, Stand 12"
                 className="border-wedding-primary/50 focus:border-wedding-primary"
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label className="text-wedding-dark">Fiere a cui partecipa</Label>
+              <MultiSelect
+                options={opzioniFiere}
+                selected={selectedFiere}
+                onChange={setSelectedFiere}
+                placeholder="Seleziona le fiere"
+                className="border-wedding-primary/50"
+              />
+            </div>
+
+            <div className="space-y-2 md:col-span-2">
+              <Label className="text-wedding-dark">Categorie</Label>
+              <MultiSelect
+                options={opzioniCategorie}
+                selected={selectedCategories}
+                onChange={setSelectedCategories}
+                placeholder="Seleziona le categorie"
+                className="border-wedding-primary/50"
               />
             </div>
           </div>
@@ -175,13 +256,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
           <Separator className="my-4 bg-wedding-primary/30" />
           
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-wedding-dark">Images</h3>
+            <h3 className="text-lg font-semibold text-wedding-dark">Immagini</h3>
             
             <div className="flex gap-2">
               <Input 
                 value={imageUrl} 
                 onChange={(e) => setImageUrl(e.target.value)} 
-                placeholder="Image URL" 
+                placeholder="URL Immagine" 
                 className="flex-grow border-wedding-primary/50 focus:border-wedding-primary"
               />
               <Button 
@@ -190,13 +271,13 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
                 variant="outline"
                 className="border-wedding-primary/50 hover:bg-wedding-primary/20"
               >
-                Add Image
+                Aggiungi Immagine
               </Button>
             </div>
             
             {images.length > 0 && (
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Added Images:</p>
+                <p className="text-sm text-muted-foreground">Immagini aggiunte:</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {images.map((img, index) => (
                     <div key={index} className="flex items-center justify-between p-2 bg-muted rounded-md">
@@ -208,7 +289,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
                         onClick={() => handleRemoveImage(index)}
                         className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
                       >
-                        Remove
+                        Rimuovi
                       </Button>
                     </div>
                   ))}
@@ -222,7 +303,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
               type="submit" 
               className="bg-wedding-gold hover:bg-wedding-gold/90 text-white min-w-32"
             >
-              Add Exhibitor
+              Aggiungi Espositore
             </Button>
           </div>
         </form>

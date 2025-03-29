@@ -95,23 +95,28 @@
 }
 
 @font-face {
-  font-family: 'Cormorant Garamond';
-  src: url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap');
+  font-family: 'Roboto';
+  src: url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
   font-display: swap;
 }
 
-@font-face {
-  font-family: 'Montserrat';
-  src: url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
-  font-display: swap;
+.nav-link {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 18px;
+  color: rgb(140, 78, 69);
+}
+
+body, p, a, span, div, button, input, textarea {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 400;
+  font-size: 23px;
+  color: rgb(77, 92, 109);
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Cormorant Garamond', serif;
-}
-
-body, p, a, span, div, button {
-  font-family: 'Montserrat', sans-serif;
+  font-family: 'Roboto', sans-serif;
+  color: rgb(77, 92, 109);
 }
 
 .espositore-card {
@@ -129,3 +134,4 @@ body, p, a, span, div, button {
   align-items: center;
   justify-content: center;
 }
+

@@ -20,7 +20,7 @@ const Admin: React.FC = () => {
         const { data } = await supabase.auth.getSession();
         setIsAuthenticated(!!data.session);
       } catch (error) {
-        console.error('Error checking session:', error);
+        console.error('Errore nel controllo della sessione:', error);
       } finally {
         setIsLoading(false);
       }
@@ -46,8 +46,8 @@ const Admin: React.FC = () => {
     
     setEspositoriList([...espositoriList, espositoreWithId]);
     
-    // In a real application, this is where you would send the data to your backend
-    console.log('New espositore added:', espositoreWithId);
+    // In un'applicazione reale, qui invieresti i dati al tuo backend
+    console.log('Nuovo espositore aggiunto:', espositoreWithId);
   };
 
   const handleLogout = async () => {
@@ -74,7 +74,7 @@ const Admin: React.FC = () => {
         {isAuthenticated ? (
           <>
             <div className="text-center mb-10">
-              <h1 className="text-4xl md:text-5xl font-semibold text-wedding-dark mb-3">Admin Panel</h1>
+              <h1 className="text-4xl md:text-5xl font-semibold text-wedding-dark mb-3">Pannello Amministratore</h1>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 Gestisci gli espositori per la fiera Sposi Oggi. Aggiungi nuovi espositori utilizzando il modulo sottostante.
               </p>

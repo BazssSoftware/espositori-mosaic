@@ -6,7 +6,10 @@ export interface Espositore {
   logoUrl: string;
   website?: string;
   phoneNumber?: string;
+  email?: string;
   fairLocation?: string;
-  images?: string[];
   category?: string;
+  images?: string[];
+  fiere?: string[];
+  categories?: string[];
 }
