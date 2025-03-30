@@ -86,8 +86,8 @@ const Index: React.FC = () => {
             <div>
               <label className="block text-sm font-medium mb-1">Fiere</label>
               <MultiSelect
-                options={opzioniFiere}
-                selected={selectedFiere}
+                options={opzioniFiere || []}
+                selected={selectedFiere || []}
                 onChange={setSelectedFiere}
                 placeholder="Tutte le fiere"
               />
