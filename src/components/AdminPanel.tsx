@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -81,7 +82,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
       return;
     }
     
-    // Creazione nuovo espositore
+    // Ensure arrays are defined
     const newEspositore: Omit<Espositore, 'id'> = {
       name: name.trim(),
       description: description.trim(),
@@ -90,9 +91,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
       phoneNumber: phoneNumber.trim() || undefined,
       fairLocation: fairLocation.trim() || undefined,
       email: email.trim() || undefined,
-      images: images.length > 0 ? [...images] : undefined,
-      fiere: selectedFiere.length > 0 ? [...selectedFiere] : undefined,
-      categories: selectedCategories.length > 0 ? [...selectedCategories] : undefined,
+      images: images.length > 0 ? [...images] : [],
+      fiere: selectedFiere.length > 0 ? [...selectedFiere] : [],
+      categories: selectedCategories.length > 0 ? [...selectedCategories] : [],
     };
     
     // Aggiunta dell'espositore

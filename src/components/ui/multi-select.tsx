@@ -20,7 +20,7 @@ type MultiSelectProps = {
 
 export function MultiSelect({
   options,
-  selected,
+  selected = [], // Add default empty array
   onChange,
   placeholder = "Seleziona...",
   className,
@@ -29,8 +29,11 @@ export function MultiSelect({
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
 
+  // Ensure selected is always an array
+  const safeSelected = Array.isArray(selected) ? selected : [];
+
   const handleUnselect = (item: string) => {
-    onChange(selected.filter((i) => i !== item));
+    onChange(safeSelected.filter((i) => i !== item));
   };
 
   const handleKeyDown = React.useCallback(
@@ -38,8 +41,8 @@ export function MultiSelect({
       const input = inputRef.current;
       if (input) {
         if (e.key === "Delete" || e.key === "Backspace") {
-          if (input.value === "" && selected.length > 0) {
-            onChange(selected.slice(0, -1));
+          if (input.value === "" && safeSelected.length > 0) {
+            onChange(safeSelected.slice(0, -1));
           }
         }
         if (e.key === "Escape") {
@@ -47,10 +50,14 @@ export function MultiSelect({
         }
       }
     },
-    [selected, onChange]
+    [safeSelected, onChange]
   );
 
-  const selectables = options.filter((item) => !selected.includes(item.value));
+  // Ensure options is always an array
+  const safeOptions = Array.isArray(options) ? options : [];
+  
+  // Filter out already selected items
+  const selectables = safeOptions.filter((item) => !safeSelected.includes(item.value));
 
   return (
     <div className={className}>
@@ -60,8 +67,8 @@ export function MultiSelect({
       >
         <div className="flex items-center border border-input px-3 rounded-md">
           <div className="flex flex-wrap gap-1 p-1">
-            {selected.map((item) => {
-              const selectedOption = options.find((option) => option.value === item);
+            {safeSelected.map((item) => {
+              const selectedOption = safeOptions.find((option) => option.value === item);
               return (
                 <Badge key={item} variant="secondary" className="rounded-sm px-1">
                   {selectedOption?.label || item}
@@ -82,7 +89,7 @@ export function MultiSelect({
               onValueChange={setInputValue}
               onBlur={() => setOpen(false)}
               onFocus={() => setOpen(true)}
-              placeholder={selected.length === 0 ? placeholder : undefined}
+              placeholder={safeSelected.length === 0 ? placeholder : undefined}
               className="ml-2 bg-transparent outline-none placeholder:text-muted-foreground flex-1 h-10"
             />
           </div>
@@ -101,7 +108,7 @@ export function MultiSelect({
                       }}
                       onSelect={() => {
                         setInputValue("");
-                        onChange([...selected, option.value]);
+                        onChange([...safeSelected, option.value]);
                       }}
                       className="cursor-pointer"
                     >

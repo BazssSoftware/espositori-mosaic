@@ -139,6 +139,7 @@ const GestioneEspositori: React.FC<GestioneEspositoriProps> = ({
       return;
     }
     
+    // Ensure arrays are defined
     const updatedEspositore: Omit<Espositore, 'id'> = {
       name: editName.trim(),
       description: editDescription.trim(),
@@ -147,9 +148,9 @@ const GestioneEspositori: React.FC<GestioneEspositoriProps> = ({
       phoneNumber: editPhoneNumber.trim() || undefined,
       fairLocation: editFairLocation.trim() || undefined,
       email: editEmail.trim() || undefined,
-      images: editImages.length > 0 ? [...editImages] : undefined,
-      fiere: editSelectedFiere.length > 0 ? [...editSelectedFiere] : undefined,
-      categories: editSelectedCategories.length > 0 ? [...editSelectedCategories] : undefined,
+      images: editImages.length > 0 ? [...editImages] : [],
+      fiere: editSelectedFiere.length > 0 ? [...editSelectedFiere] : [],
+      categories: editSelectedCategories.length > 0 ? [...editSelectedCategories] : [],
     };
     
     onUpdateEspositore(currentEspositore.id, updatedEspositore);
@@ -326,7 +327,7 @@ const GestioneEspositori: React.FC<GestioneEspositoriProps> = ({
                   <Label>Fiere a cui partecipa</Label>
                   <MultiSelect
                     options={opzioniFiere}
-                    selected={editSelectedFiere}
+                    selected={editSelectedFiere || []}
                     onChange={setEditSelectedFiere}
                     placeholder="Seleziona le fiere"
                   />
@@ -335,7 +336,7 @@ const GestioneEspositori: React.FC<GestioneEspositoriProps> = ({
                   <Label>Categorie</Label>
                   <MultiSelect
                     options={opzioniCategorie}
-                    selected={editSelectedCategories}
+                    selected={editSelectedCategories || []}
                     onChange={setEditSelectedCategories}
                     placeholder="Seleziona le categorie"
                   />

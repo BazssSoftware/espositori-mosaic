@@ -43,12 +43,24 @@ const GestioneEspositoriPage: React.FC = () => {
   }, []);
 
   const handleUpdateEspositore = (id: string, updatedEspositore: Omit<Espositore, 'id'>) => {
+    // Ensure all fields are properly defined
+    const sanitizedEspositore: Omit<Espositore, 'id'> = {
+      ...updatedEspositore,
+      fiere: updatedEspositore.fiere || [],
+      categories: updatedEspositore.categories || [],
+    };
+
     setEspositori(espositori.map(esp => 
-      esp.id === id ? { ...updatedEspositore, id } : esp
+      esp.id === id ? { ...sanitizedEspositore, id } : esp
     ));
     
     // In un'applicazione reale, qui invieresti i dati aggiornati al tuo backend
-    console.log('Espositore aggiornato:', { id, ...updatedEspositore });
+    console.log('Espositore aggiornato:', { id, ...sanitizedEspositore });
+    
+    toast({
+      title: "Espositore aggiornato",
+      description: "L'espositore è stato aggiornato con successo.",
+    });
   };
 
   const handleDeleteEspositore = (id: string) => {
@@ -56,6 +68,11 @@ const GestioneEspositoriPage: React.FC = () => {
     
     // In un'applicazione reale, qui invieresti una richiesta di eliminazione al tuo backend
     console.log('Espositore eliminato:', id);
+    
+    toast({
+      title: "Espositore eliminato",
+      description: "L'espositore è stato eliminato con successo.",
+    });
   };
 
   const handleLogout = async () => {
