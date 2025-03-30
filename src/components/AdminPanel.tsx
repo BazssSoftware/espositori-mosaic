@@ -12,6 +12,13 @@ import { MultiSelect } from "@/components/ui/multi-select";
 import { getOpzioniFiere } from "@/data/fiere";
 import { getOpzioniCategorie } from "@/data/categorie";
 import { useNavigate } from 'react-router-dom';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface AdminPanelProps {
   onAddEspositore: (espositore: Omit<Espositore, 'id'>) => void;
@@ -30,7 +37,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
   const [imageUrl, setImageUrl] = useState('');
   const [images, setImages] = useState<string[]>([]);
   const [selectedFiere, setSelectedFiere] = useState<string[]>([]);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
 
   const opzioniFiere = getOpzioniFiere();
   const opzioniCategorie = getOpzioniCategorie();
@@ -82,6 +89,9 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
       return;
     }
     
+    // Categoria singola invece di array di categorie
+    const categoriaArray = selectedCategory ? [selectedCategory] : [];
+    
     // Ensure arrays are defined
     const newEspositore: Omit<Espositore, 'id'> = {
       name: name.trim(),
@@ -93,7 +103,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
       email: email.trim() || undefined,
       images: images.length > 0 ? [...images] : [],
       fiere: selectedFiere.length > 0 ? [...selectedFiere] : [],
-      categories: selectedCategories.length > 0 ? [...selectedCategories] : [],
+      categories: categoriaArray,
     };
     
     // Aggiunta dell'espositore
@@ -110,7 +120,7 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
     setImageUrl('');
     setImages([]);
     setSelectedFiere([]);
-    setSelectedCategories([]);
+    setSelectedCategory('');
     
     // Mostra messaggio di successo
     toast({
@@ -250,14 +260,19 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
             </div>
 
             <div className="space-y-2 md:col-span-2">
-              <Label className="text-wedding-dark">Categorie</Label>
-              <MultiSelect
-                options={opzioniCategorie}
-                selected={selectedCategories}
-                onChange={setSelectedCategories}
-                placeholder="Seleziona le categorie"
-                className="border-wedding-primary/50"
-              />
+              <Label className="text-wedding-dark">Categoria</Label>
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="border-wedding-primary/50">
+                  <SelectValue placeholder="Seleziona una categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  {opzioniCategorie.map((categoria) => (
+                    <SelectItem key={categoria.value} value={categoria.value}>
+                      {categoria.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           

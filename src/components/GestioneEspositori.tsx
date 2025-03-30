@@ -33,6 +33,13 @@ import { Espositore } from "@/types/espositore";
 import { getOpzioniFiere } from "@/data/fiere";
 import { getOpzioniCategorie } from "@/data/categorie";
 import { PenIcon, TrashIcon, MoreVerticalIcon } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface GestioneEspositoriProps {
   espositori: Espositore[];
@@ -62,6 +69,7 @@ const GestioneEspositori: React.FC<GestioneEspositoriProps> = ({
   const [editImages, setEditImages] = useState<string[]>([]);
   const [editSelectedFiere, setEditSelectedFiere] = useState<string[]>([]);
   const [editSelectedCategories, setEditSelectedCategories] = useState<string[]>([]);
+  const [editSelectedCategory, setEditSelectedCategory] = useState<string>('');
   const [newImageUrl, setNewImageUrl] = useState('');
 
   const opzioniFiere = getOpzioniFiere();
@@ -82,7 +90,10 @@ const GestioneEspositori: React.FC<GestioneEspositoriProps> = ({
     setEditFairLocation(espositore.fairLocation || '');
     setEditImages(espositore.images || []);
     setEditSelectedFiere(espositore.fiere || []);
-    setEditSelectedCategories(espositore.categories || []);
+    // Per il rendering del Select di categoria singola
+    setEditSelectedCategory(espositore.categories && espositore.categories.length > 0 
+      ? espositore.categories[0] 
+      : '');
     setIsEditDialogOpen(true);
   };
 
@@ -139,6 +150,9 @@ const GestioneEspositori: React.FC<GestioneEspositoriProps> = ({
       return;
     }
     
+    // Categoria singola invece di array di categorie
+    const categoriaSingola = editSelectedCategory ? [editSelectedCategory] : [];
+    
     // Ensure arrays are defined
     const updatedEspositore: Omit<Espositore, 'id'> = {
       name: editName.trim(),
@@ -150,7 +164,7 @@ const GestioneEspositori: React.FC<GestioneEspositoriProps> = ({
       email: editEmail.trim() || undefined,
       images: editImages.length > 0 ? [...editImages] : [],
       fiere: editSelectedFiere.length > 0 ? [...editSelectedFiere] : [],
-      categories: editSelectedCategories.length > 0 ? [...editSelectedCategories] : [],
+      categories: categoriaSingola,
     };
     
     onUpdateEspositore(currentEspositore.id, updatedEspositore);
@@ -166,6 +180,7 @@ const GestioneEspositori: React.FC<GestioneEspositoriProps> = ({
     if (currentEspositore) {
       onDeleteEspositore(currentEspositore.id);
       setIsDeleteDialogOpen(false);
+      setCurrentEspositore(null); // Reset currentEspositore after deletion
       
       toast({
         title: "Espositore eliminato",
@@ -201,7 +216,7 @@ const GestioneEspositori: React.FC<GestioneEspositoriProps> = ({
                   <TableHead>Nome</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Sito Web</TableHead>
-                  <TableHead>Categorie</TableHead>
+                  <TableHead>Categoria</TableHead>
                   <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
@@ -213,9 +228,7 @@ const GestioneEspositori: React.FC<GestioneEspositoriProps> = ({
                     <TableCell>{espositore.website || '-'}</TableCell>
                     <TableCell>
                       {espositore.categories && espositore.categories.length > 0 
-                        ? espositore.categories.length > 2 
-                          ? `${espositore.categories.length} categorie` 
-                          : espositore.categories.join(', ')
+                        ? espositore.categories.join(', ')
                         : '-'}
                     </TableCell>
                     <TableCell className="text-right">
@@ -327,19 +340,25 @@ const GestioneEspositori: React.FC<GestioneEspositoriProps> = ({
                   <Label>Fiere a cui partecipa</Label>
                   <MultiSelect
                     options={opzioniFiere}
-                    selected={editSelectedFiere || []}
+                    selected={editSelectedFiere}
                     onChange={setEditSelectedFiere}
                     placeholder="Seleziona le fiere"
                   />
                 </div>
                 <div className="space-y-2 md:col-span-2">
-                  <Label>Categorie</Label>
-                  <MultiSelect
-                    options={opzioniCategorie}
-                    selected={editSelectedCategories || []}
-                    onChange={setEditSelectedCategories}
-                    placeholder="Seleziona le categorie"
-                  />
+                  <Label>Categoria</Label>
+                  <Select value={editSelectedCategory} onValueChange={setEditSelectedCategory}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Seleziona una categoria" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {opzioniCategorie.map((categoria) => (
+                        <SelectItem key={categoria.value} value={categoria.value}>
+                          {categoria.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               

@@ -1,15 +1,18 @@
+
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, MapPin, Calendar, Phone } from "lucide-react";
 import { espositori } from '@/data/espositori';
 import { Espositore } from '@/types/espositore';
 import { generatePDF } from '@/utils/pdfGenerator';
 import { useToast } from '@/components/ui/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { fiere } from '@/data/fiere';
+import { Badge } from "@/components/ui/badge";
 
 const EspositoreDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -69,6 +72,17 @@ const EspositoreDetail: React.FC = () => {
       setIsGeneratingPDF(false);
     }
   };
+
+  // Ottieni le fiere a cui partecipa l'espositore
+  const getFiereEspositore = () => {
+    if (!espositore?.fiere || espositore.fiere.length === 0) return [];
+    
+    return fiere.filter(fiera => 
+      espositore.fiere?.includes(fiera.id)
+    );
+  };
+
+  const fiereEspositore = getFiereEspositore();
 
   if (!espositore) {
     return (
@@ -133,6 +147,20 @@ const EspositoreDetail: React.FC = () => {
               <p className="text-gray-700 leading-relaxed">{espositore.description}</p>
             </div>
             
+            {fiereEspositore.length > 0 && (
+              <div>
+                <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Partecipa a</h2>
+                <div className="flex flex-wrap gap-2">
+                  {fiereEspositore.map(fiera => (
+                    <Badge key={fiera.id} variant="outline" className="flex gap-1 items-center px-3 py-1">
+                      <Calendar className="h-4 w-4 text-wedding-gold" />
+                      <span>{fiera.nome} | {fiera.data}</span>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            
             {espositore.website && (
               <div>
                 <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Sito Web</h2>
@@ -150,14 +178,23 @@ const EspositoreDetail: React.FC = () => {
             {espositore.phoneNumber && (
               <div>
                 <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Contatti</h2>
-                <p className="text-gray-700">{espositore.phoneNumber}</p>
+                <a 
+                  href={`tel:${espositore.phoneNumber.replace(/\s+/g, '')}`} 
+                  className="text-blue-600 hover:underline flex items-center"
+                >
+                  <Phone className="mr-2 h-4 w-4" />
+                  {espositore.phoneNumber}
+                </a>
               </div>
             )}
             
             {espositore.fairLocation && (
               <div>
                 <h2 className="text-2xl font-semibold mb-3 text-wedding-dark">Posizione Fiera</h2>
-                <p className="text-gray-700">{espositore.fairLocation}</p>
+                <p className="text-gray-700 flex items-center">
+                  <MapPin className="mr-2 h-4 w-4 text-wedding-gold" />
+                  {espositore.fairLocation}
+                </p>
               </div>
             )}
             
