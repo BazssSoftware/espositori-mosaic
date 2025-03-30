@@ -19,8 +19,8 @@ type MultiSelectProps = {
 };
 
 export function MultiSelect({
-  options = [], // Add default empty array for options
-  selected = [], // Add default empty array
+  options = [], // Default empty array for options
+  selected = [], // Default empty array for selected
   onChange,
   placeholder = "Seleziona...",
   className,
@@ -59,6 +59,10 @@ export function MultiSelect({
   // Filter out already selected items from safe options
   const selectables = safeOptions.filter((item) => !safeSelected.includes(item.value));
 
+  // Extra safety check for rendering - ensure all arrays used in rendering are defined
+  const selectedBadges = safeSelected || [];
+  const selectableItems = selectables || [];
+
   return (
     <div className={className}>
       <Command
@@ -67,7 +71,7 @@ export function MultiSelect({
       >
         <div className="flex items-center border border-input px-3 rounded-md">
           <div className="flex flex-wrap gap-1 p-1">
-            {safeSelected.map((item) => {
+            {selectedBadges.map((item) => {
               const selectedOption = safeOptions.find((option) => option.value === item);
               return (
                 <Badge key={item} variant="secondary" className="rounded-sm px-1">
@@ -95,10 +99,10 @@ export function MultiSelect({
           </div>
         </div>
         <div className="relative">
-          {open && selectables.length > 0 ? (
+          {open && selectableItems.length > 0 ? (
             <div className="absolute w-full z-10 top-0 rounded-md border bg-popover text-popover-foreground shadow-md outline-none animate-in">
               <CommandGroup className="h-full overflow-auto max-h-60">
-                {selectables.map((option) => {
+                {selectableItems.map((option) => {
                   return (
                     <CommandItem
                       key={option.value}
