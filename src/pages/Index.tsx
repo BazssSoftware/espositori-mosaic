@@ -73,7 +73,7 @@ const Index: React.FC = () => {
                   <SelectValue placeholder="Tutte le categorie" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Tutte le categorie</SelectItem>
+                  <SelectItem value="_all">Tutte le categorie</SelectItem>
                   {opzioniCategorie.map(categoria => (
                     <SelectItem key={categoria.value} value={categoria.value}>
                       {categoria.label}
