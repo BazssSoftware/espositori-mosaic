@@ -19,7 +19,7 @@ type MultiSelectProps = {
 };
 
 export function MultiSelect({
-  options,
+  options = [], // Add default empty array for options
   selected = [], // Add default empty array
   onChange,
   placeholder = "Seleziona...",
@@ -29,6 +29,9 @@ export function MultiSelect({
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
 
+  // Ensure options is always an array
+  const safeOptions = Array.isArray(options) ? options : [];
+  
   // Ensure selected is always an array
   const safeSelected = Array.isArray(selected) ? selected : [];
 
@@ -52,11 +55,8 @@ export function MultiSelect({
     },
     [safeSelected, onChange]
   );
-
-  // Ensure options is always an array
-  const safeOptions = Array.isArray(options) ? options : [];
   
-  // Filter out already selected items
+  // Filter out already selected items from safe options
   const selectables = safeOptions.filter((item) => !safeSelected.includes(item.value));
 
   return (
