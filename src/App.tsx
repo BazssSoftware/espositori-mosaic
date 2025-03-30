@@ -9,6 +9,7 @@ import Admin from "./pages/Admin";
 import EspositoreDetail from "./pages/EspositoreDetail";
 import GestioneFierePage from "./pages/GestioneFierePage";
 import GestioneCategoriePage from "./pages/GestioneCategoriePage";
+import GestioneEspositoriPage from "./pages/GestioneEspositoriPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
           <Route path="/admin" element={<Admin />} />
           <Route path="/admin/fiere" element={<GestioneFierePage />} />
           <Route path="/admin/categorie" element={<GestioneCategoriePage />} />
+          <Route path="/admin/espositori" element={<GestioneEspositoriPage />} />
           <Route path="/espositori/:id" element={<EspositoreDetail />} />
           <Route path="*" element={<NotFound />} />
         </Routes>

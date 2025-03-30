@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useToast } from "@/components/ui/use-toast";
 import { Button } from "@/components/ui/button";
@@ -140,6 +139,14 @@ const AdminPanel: React.FC<AdminPanelProps> = ({ onAddEspositore }) => {
             className="border-wedding-primary/50 hover:bg-wedding-primary/20"
           >
             Gestione Categorie
+          </Button>
+          
+          <Button
+            onClick={() => navigate('/admin/espositori')}
+            variant="outline"
+            className="border-wedding-primary/50 hover:bg-wedding-primary/20"
+          >
+            Gestione Espositori
           </Button>
         </div>
         
