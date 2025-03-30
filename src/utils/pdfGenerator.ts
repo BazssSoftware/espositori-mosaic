@@ -47,10 +47,21 @@ export const generatePDF = async (espositore: Espositore): Promise<string> => {
   try {
     let yPosition = 20;
     
+    // Aggiungi il logo Sposi Oggi in alto
+    try {
+      const logoUrl = "/logo-sposi-oggi.png";
+      doc.addImage(logoUrl, "PNG", 105 - 30, yPosition, 60, 30, undefined, 'FAST');
+      yPosition += 40;
+    } catch (e) {
+      console.error("Errore nel caricamento del logo Sposi Oggi:", e);
+      // Continua senza il logo
+      yPosition += 10;
+    }
+    
     // Titolo
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
-    doc.text("Espositore Sposi Oggi", 105, yPosition, { align: "center" });
+    doc.text("Scheda espositore Sposi Oggi", 105, yPosition, { align: "center" });
     yPosition += 15;
     
     // Nome dell'espositore come sottotitolo
@@ -173,15 +184,7 @@ export const generatePDF = async (espositore: Espositore): Promise<string> => {
       }
     }
     
-    // Aggiungi footer con informazioni aziendali
-    const footerYPos = 280;
-    doc.setFontSize(10);
-    doc.setTextColor(100, 100, 100);
-    doc.setFont("helvetica", "normal");
-    doc.text("Sposi Oggi - Un progetto di Events Srls", 105, footerYPos - 20, { align: "center" });
-    doc.text("Via Montello 11 Treviso (TV)", 105, footerYPos - 15, { align: "center" });
-    doc.text("P.IVA 05127530268 | marketing@onlyoumedia.it", 105, footerYPos - 10, { align: "center" });
-    doc.text(`Generato il ${new Date().toLocaleDateString()}`, 105, footerYPos - 5, { align: "center" });
+    // Rimosso il footer come richiesto
     
   } catch (error) {
     console.error("Errore nella generazione del PDF:", error);
